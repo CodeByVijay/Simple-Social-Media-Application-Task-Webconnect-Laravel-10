@@ -2,11 +2,12 @@
     <div class="container">
         <h2 class="logo">Social Media</h2>
         <div class="create">
-            <label class="btn btn-primary" for="create-post">Create Post</label>
+            <label class="btn btn-primary createNewPostBtn" for="create-post">Create Post</label>
             <div class="profile-pic">
-                <img src="https://res.cloudinary.com/freecodez/image/upload/v1698067298/images/fy8azbqxhgdrbbijhipe.webp" alt="pic 1" />
+                <img src="{{asset('assets/images/profile.png')}}" alt="pic 1" />
             </div>
-            <label class="btn btn-danger" for="create-post">Logout</label>
+            <span>{{ Auth::user()->name }}</span>
+            <a href="{{route('logout')}}" class="btn btn-danger" for="create-post">Logout</a>
         </div>
     </div>
 </nav>
