@@ -16,7 +16,7 @@
 
                 <div class="feeds">
 
-                    @foreach ($posts as $post)
+                    @forelse ($posts as $post)
                         <div class="feed">
                             <div class="head"></div>
                             <div class="user">
@@ -52,7 +52,9 @@
                             </div>
 
                         </div>
-                    @endforeach
+                        @empty
+                        <h5 class="text-center text-danger">Currently No Posts.</h5>
+                    @endforelse
 
 
                 </div>
