@@ -13,7 +13,7 @@ class PostController extends Controller
 {
     use ImageUploadTrait;
 
-
+    // Create Post
     public function savePost(Request $request)
     {
         $request->validate([
@@ -31,7 +31,7 @@ class PostController extends Controller
                 "post_desc" => $request->description,
                 "file" => $file ?? null,
             ]);
-            
+
             DB::commit();
 
             return redirect()->route("home")->with("success", "Post Successfully Created.");

@@ -11,17 +11,17 @@
             </div>
             <form action="{{ route('register_post') }}" method="POST">
                 @csrf
-                <input type="text" name="name" placeholder="Name" required>
+                <input type="text" name="name" placeholder="Name" value="{{old('name')}}" required>
                 @error('name')
-                    <span>{{ $message }}</span>
+                    <span style="color: red;">{{ $message }}</span>
                 @enderror
-                <input type="email" name="email" placeholder="Email" required>
+                <input type="email" name="email" placeholder="Email" value="{{old('email')}}" required>
                 @error('email')
-                    <span>{{ $message }}</span>
+                    <span style="color: red;">{{ $message }}</span>
                 @enderror
-                <input type="text" name="mobile" placeholder="Mobile" required>
+                <input type="text" name="mobile" placeholder="Mobile" value="{{old('mobile')}}" required>
                 @error('mobile')
-                    <span>{{ $message }}</span>
+                    <span style="color: red;">{{ $message }}</span>
                 @enderror
                 <input type="password" name="password" placeholder="Password" required>
                 <div class="link">

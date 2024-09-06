@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\EmailVerificationEvent;
+use App\Events\ResetPasswordEvent;
 use App\Models\Follower;
 use App\Models\User;
 use App\Models\Verification;
@@ -37,6 +38,7 @@ class AuthController extends Controller
         return view('auth.reset');
     }
 
+    // Register New User
     public function registerPost(Request $request)
     {
         $request->validate([
@@ -62,6 +64,7 @@ class AuthController extends Controller
         }
     }
 
+    // Login User
     public function loginPost(Request $request)
     {
         $request->validate([
@@ -79,16 +82,17 @@ class AuthController extends Controller
                 } else {
                     Auth::logout();
                     $message = "Your email not verified. Please verify or <a href='" . route('resend_email', ['email' => $user->email]) . "'>Resend Verification Mail</a>";
-                    return redirect()->back()->with("error", $message);
+                    return redirect()->back()->withInput()->with("error", $message);
                 }
             } else {
-                return redirect()->back()->with("error", "Credential Wrong!");
+                return redirect()->back()->withInput()->with("error", "Credentials Wrong!");
             }
         } catch (Exception $e) {
             return redirect()->back()->with("error", $e->getMessage());
         }
     }
 
+    // Resend Email verification Mail
     public function resendVerifyEmail($email)
     {
         if (!empty($email)) {
@@ -99,11 +103,12 @@ class AuthController extends Controller
         }
     }
 
+    // Verify Email
     public function verifyEmail(Request $request)
     {
         $token = $request->token;
         if (!empty($token)) {
-            $getData = Verification::where("token", $token)->first();
+            $getData = Verification::where(["token" => $token, "type" => "verification"])->first();
             if ($getData) {
                 $expireAt = Carbon::parse($getData->expire_at);
                 if (Carbon::now()->lt($expireAt)) {
@@ -117,19 +122,21 @@ class AuthController extends Controller
                     return redirect()->route('login')->with("error", "Token has expired.");
                 }
             } else {
-                return redirect()->route('login')->with("error", "Token Not Found.");
+                return redirect()->route('login')->with("error", "Token Invalid.");
             }
         } else {
-            return redirect()->route('login')->with("error", "Token Not Found.");
+            return redirect()->route('login')->with("error", "Token Invalid.");
         }
     }
 
+    // Logout User Only Current Device
     public function logout()
     {
         Auth::logoutCurrentDevice();
         return redirect()->route("login")->with("success", "Logout successfully completed.");
     }
 
+    // Get Followed user
     public function getUser(Request $request)
     {
         try {
@@ -138,16 +145,87 @@ class AuthController extends Controller
             $isFollowing = Follower::where('user_id', $authenticatedUserId)
                 ->where('follower_id', $targetUserId)
                 ->exists();
-                $follow = false;
-                if($isFollowing){
-                    $follow = true;
-                }
-                return response()->json(['status'=>true, "follow"=>$follow,"status_code"=>200]);
+            $follow = false;
+            if ($isFollowing) {
+                $follow = true;
+            }
+            return response()->json(['status' => true, "follow" => $follow, "status_code" => 200]);
         } catch (Exception $e) {
             return response()->json(["status" => false, "message" => $e->getMessage(), "status_code" => 500]);
         }
     }
 
+    // Forgot Password email send
+    public function forgotPass(Request $request)
+    {
+        $request->validate([
+            "email" => "required|email|exists:users,email",
+        ]);
+        try {
+            $email = $request->email;
+            if (!empty($email)) {
+                $this->sendAuthEmail($email, "forgot_pass");
+                return redirect()->route('login')->with("success", "Forgot Password Email sent. Check your inbox or spam.");
+            } else {
+                return redirect()->route('login')->with("error", "Email Not found.");
+            }
+        } catch (Exception $e) {
+            return redirect()->back()->with("error", $e->getMessage());
+        }
+    }
+
+    // Open Reset Password Form
+    public function resetPasswordForm(Request $request)
+    {
+        $token = $request->token;
+        if (!empty($token)) {
+            $getData = Verification::where(["token" => $token, "type" => "forgot_pass"])->first();
+            if ($getData) {
+                $expireAt = Carbon::parse($getData->expire_at);
+                if (Carbon::now()->lt($expireAt)) {
+                    $user_id = $getData->user_id;
+
+                    // $getData->delete();
+
+                    return view('auth.reset', compact('user_id'));
+                } else {
+                    // Token has expired
+                    return redirect()->route('login')->with("error", "Token has expired.");
+                }
+            } else {
+                return redirect()->route('login')->with("error", "Token Invalid.");
+            }
+        } else {
+            return redirect()->route('login')->with("error", "Token Invalid.");
+        }
+    }
+
+    // Update Password
+    public function setPassword(Request $request)
+    {
+        $request->validate([
+            "user_id" => 'required|exists:users,uuid',
+            "password" => 'required|min:8',
+            "confirm_password" => 'required|min:8|same:password',
+        ]);
+
+        try {
+            $user_id = $request->user_id;
+            if (!empty($user_id)) {
+                User::find($user_id)->update([
+                    'password' => Hash::make($request->password)
+                ]);
+                Verification::where(["user_id" => $user_id, "type" => "forgot_pass"])->delete();
+                return redirect()->route('login')->with("success", "Password reset successfully. Please Login your account using new password.");
+            } else {
+                return redirect()->route('login')->with("error", "Invalid Request.");
+            }
+        } catch (Exception $e) {
+            return redirect()->back()->with("error", $e->getMessage());
+        }
+    }
+
+    // mail send function
     private function sendAuthEmail($email, $type)
     {
         try {
@@ -169,7 +247,7 @@ class AuthController extends Controller
                 if ($type == "verification") {
                     event(new EmailVerificationEvent($user, $temp_Token));
                 } else {
-                    //
+                    event(new ResetPasswordEvent($user, $temp_Token));
                 }
             } else {
                 Log::channel('auth')->error("Auth Mail Send Error : {$email} - User Not Found.");

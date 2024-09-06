@@ -21,15 +21,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('/login', [AuthController::class, "index"])->name('login');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/forgot-password', [AuthController::class, 'forgot'])->name('forgot_pass');
-Route::get('/reset-password', [AuthController::class, 'reset'])->name('reset_pass');
 Route::get('/verify-email', [AuthController::class, 'verifyEmail']);
 Route::get('/resend-verify-email/{email}', [AuthController::class, 'resendVerifyEmail'])->name('resend_email');
+
+// Forgot Password & Reset
+Route::post('/forgot-password', [AuthController::class, 'forgotPass'])->name('forgot_pass_post');
+Route::get('/reset-password', [AuthController::class, 'resetPasswordForm']);
+Route::post('/set-password', [AuthController::class, 'setPassword'])->name('set_password');
 
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register_post');
 Route::post('/login', [AuthController::class, 'loginPost'])->name('login_post');
 
 Route::group(['middleware' => 'auth'], function () {
-    //All the routes that belongs to the group goes here
     Route::get('/', [HomeController::class, 'index'])->name('home');
 
     Route::post('create-new-post',[PostController::class,"savePost"])->name("craete_new_post");

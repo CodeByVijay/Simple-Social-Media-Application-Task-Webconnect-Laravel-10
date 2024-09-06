@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Events\EmailVerificationEvent;
+use App\Events\ResetPasswordEvent;
 use App\Listeners\EmailVerificationListener;
+use App\Listeners\ResetPasswordListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -24,6 +26,11 @@ class EventServiceProvider extends ServiceProvider
         // Registration Email Verification
         EmailVerificationEvent::class => [
             EmailVerificationListener::class
+        ],
+
+         // Reset Password
+         ResetPasswordEvent::class => [
+            ResetPasswordListener::class
         ],
     ];
 

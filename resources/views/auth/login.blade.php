@@ -9,11 +9,11 @@
                 <p>Connect with friends and the world </p>
                 <p> around you on Social Media.</p>
             </div>
-            <form action="{{route('login_post')}}" method="post">
+            <form action="{{ route('login_post') }}" method="post">
                 @csrf
-                <input type="email" name="email" placeholder="Email" required>
+                <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
                 @error('email')
-                    <span>{{ $message }}</span>
+                    <span style="color: red;">{{ $message }}</span>
                 @enderror
                 <input type="password" name="password" placeholder="Password" required>
                 <div class="link">
