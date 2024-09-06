@@ -8,7 +8,7 @@ Follow process successfully run this project.
 
 Link for demo
 
-https://social.devvijay.online/login
+https://social.devvijay.online
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file & email configuration is required.
