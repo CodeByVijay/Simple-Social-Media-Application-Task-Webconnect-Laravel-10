@@ -25,11 +25,11 @@ Put `APP_URL` on .env file :
 `APP_URL=http://localhost:8000`
 
 ```bash
- 1. php artisan key:generate
- 2. composer Update
- 3. php artisan storage:link
- 4. php artisan optimize:clear
- 5. php artisan serve
+  php artisan key:generate
+  composer Update
+  php artisan storage:link
+  php artisan optimize:clear
+  php artisan serve
 ```
 Enjoy your project successfully run.
 
