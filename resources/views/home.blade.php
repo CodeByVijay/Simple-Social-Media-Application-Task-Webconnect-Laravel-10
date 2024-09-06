@@ -53,7 +53,7 @@
 
                         </div>
                         @empty
-                        <h5 class="text-center text-danger">Currently No Posts.</h5>
+                        <h5 class="text-center mt-4 text-danger">Currently No Posts.</h5>
                     @endforelse
 
 
